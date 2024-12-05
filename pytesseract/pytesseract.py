@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-from __future__ import annotations
-
 import logging
 import re
 import shlex
@@ -251,6 +249,7 @@ def run_tesseract(
     config='',
     nice=0,
     timeout=0,
+    posix=True
 ):
     cmd_args = []
     not_windows = not (sys.platform == 'win32')
@@ -264,7 +263,7 @@ def run_tesseract(
         cmd_args += ('-l', lang)
 
     if config:
-        cmd_args += shlex.split(config, posix=not_windows)
+        cmd_args += shlex.split(config, posix=posix)
 
     for _extension in extension.split():
         if _extension not in {'box', 'osd', 'tsv', 'xml'}:
@@ -336,6 +335,7 @@ def run_and_get_output(
     config='',
     nice=0,
     timeout=0,
+    posix=True,
     return_bytes=False,
 ):
     with save(image) as (temp_name, input_filename):
@@ -347,6 +347,7 @@ def run_and_get_output(
             'config': config,
             'nice': nice,
             'timeout': timeout,
+            'posix': posix
         }
 
         run_tesseract(**kwargs)
@@ -477,11 +478,12 @@ def image_to_string(
     nice=0,
     output_type=Output.STRING,
     timeout=0,
+    posix=True
 ):
     """
     Returns the result of a Tesseract OCR run on the provided image to string
     """
-    args = [image, 'txt', lang, config, nice, timeout]
+    args = [image, 'txt', lang, config, nice, timeout, posix]
 
     return {
         Output.BYTES: lambda: run_and_get_output(*(args + [True])),
